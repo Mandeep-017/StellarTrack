@@ -1,7 +1,12 @@
+# Use environment variable WORKSPACE provided by Jenkins
+$WORKSPACE_DIR = $env:WORKSPACE
+if (-not $WORKSPACE_DIR) {
+    throw "❌ WORKSPACE environment variable not set. Are you running this inside Jenkins?"
+}
+
 $DEPLOY_DIR = "C:\nginx\html\stellartrack"
 $BACKUP_DIR = "C:\nginx\html\stellartrack_backup"
-$WORKSPACE_DIR = "C:\ProgramData\Jenkins\.jenkins\workspace\automation"
-$SITE_SOURCE = "$WORKSPACE_DIR\site"
+$SITE_SOURCE = Join-Path $WORKSPACE_DIR "site"
 
 try {
     # Cleanup previous backup
@@ -35,7 +40,7 @@ try {
     Copy-Item "$SITE_SOURCE\*" $DEPLOY_DIR -Recurse -Force -ErrorAction Stop
 
     # Verify deployment
-    $indexPath = "$DEPLOY_DIR\index.html"
+    $indexPath = Join-Path $DEPLOY_DIR "index.html"
     if (-not (Test-Path $indexPath)) {
         throw "❌ Deployment failed: index.html missing"
     }
